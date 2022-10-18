@@ -1,23 +1,16 @@
 import { ConfigModule } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { CacheInterceptor, CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
-import { TypeaheadModule } from './typeahead/typeahead.module';
+import { TypeaheadService } from './typeahead/typeahead.service';
+import { TypeaheadController } from './typeahead/typeahead.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       ignoreEnvFile: true,
     }),
-    TypeaheadModule,
-    CacheModule.register(),
   ],
-  controllers: [],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
-  ],
+  controllers: [TypeaheadController],
+  providers: [TypeaheadService],
 })
 export class AppModule {}
