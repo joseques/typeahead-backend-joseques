@@ -10,11 +10,11 @@
 # FROM node:lts-alpine # for Node.js 12
 # FROM node:10-alpine3.10 # for Node.js 10
 # or any other listed here https://hub.docker.com/_/node/
-FROM node:current-alpine
+FROM node:current-alpine as ts-compiler
 
 # Directory inside the container where your app code will live.
 # You probably won't need to change this
-WORKDIR /usr/src/app
+WORKDIR /usr/app/
 
 # This will export the PORT environment variable to your application.
 # It has 12345 as default value, but when running the container we might pass
@@ -25,6 +25,8 @@ ENV PORT 12345
 # It has 10 as default value, but when running the container we might pass
 # any other value
 ENV SUGGESTION_NUMBER 10
+
+ENV HOST http://localhost:3000/
 
 # Avoid changing this too; it will expose the port so
 # other containers can connect to your app.
@@ -39,6 +41,12 @@ EXPOSE $PORT
 # COPY package.json yarn.lock ./
 COPY package.json package-lock.json ./
 
+# Add Typescript deps and configs
+COPY tsconfig.json tsconfig.json ./
+
+# Copy all the rest of the code
+COPY . ./
+
 # Now install dependencies. It's good to do this before copying the rest of the code
 # so we take advantage of caching a docker layer that has the dependencies installed
 # independently on whether the rest of the code changes.
@@ -46,8 +54,6 @@ COPY package.json package-lock.json ./
 # RUN yarn
 RUN npm install
 
-# Copy all the rest of the code
-COPY . .
 
 # Finally, tell the container how to run your app. Imagine you "split"
 # the command you usually use with spaces and write that array. This simple one
@@ -55,4 +61,19 @@ COPY . .
 # you might want to run our app are:
 # CMD [ "npm", "run", "start" ]
 # CMD [ "yarn", "start" ]
-CMD [ "node", "index.js" ]
+CMD [ "npm", "build" ]
+
+# Remove TS content
+FROM node:current-alpine as ts-remover
+WORKDIR /usr/app
+COPY --from=ts-compiler /usr/app/package*.json ./
+COPY --from=ts-compiler /usr/app/dist ./
+RUN npm install --only=production
+CMD ["main.js"]
+
+# Install distroless and deps only
+# FROM gcr.io/distroless/nodejs:14
+# WORKDIR /usr/app
+# COPY --from=ts-remover /usr/app ./
+# USER 1000
+# CMD ["main.js"]
