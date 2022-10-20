@@ -1,10 +1,11 @@
+const envPort = process.env.PORT || 12345;
+const currentEnvironment =
+  process.env.ENV || process.env.NODE_ENV || 'development';
 const Constants = {
   MAX_TYPEAHEAD_RESULTS: 10,
   SOURCE_JSON_FILE: 'names.json',
-  ALLOWED_ORIGIN: `http://${process.env.HOST || 'localhost'}:${
-    process.env.PORT || 3000
-  }/`,
-  PORT: process.env.PORT || 3000,
+  DEFAULT_PORT: envPort,
+  ENVIRONMENT: currentEnvironment,
 };
 
 export default Constants;

@@ -68,12 +68,12 @@ FROM node:current-alpine as ts-remover
 WORKDIR /usr/app
 COPY --from=ts-compiler /usr/app/package*.json ./
 COPY --from=ts-compiler /usr/app/dist ./
+COPY --from=ts-compiler /usr/app/names.json ./
 RUN npm install --only=production
-CMD ["main.js"]
 
 # Install distroless and deps only
-# FROM gcr.io/distroless/nodejs:14
-# WORKDIR /usr/app
-# COPY --from=ts-remover /usr/app ./
-# USER 1000
-# CMD ["main.js"]
+FROM gcr.io/distroless/nodejs:14
+WORKDIR /usr/app
+COPY --from=ts-remover /usr/app ./
+USER 1000
+CMD ["main.js"]

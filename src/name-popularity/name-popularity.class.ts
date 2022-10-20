@@ -96,6 +96,7 @@ export class NamePopularityTree {
 
     // Traverse tree to discover existing name in branch
     if (node) names = findNamesInNode(node, limit);
+    else return [];
 
     const newMostPopularNames = getMostPopularNames(this.maxSuggestions, [
       ...this.mostPopularNames.map(

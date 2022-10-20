@@ -21,6 +21,8 @@ export class TypeaheadService {
   }
 
   search(prefix: string, limit?: number): NamePopularity[] {
+    // Returns empty with prefixes that does not meet the name allowed characters
+    if (/([^a-zA-Z' ]*)/.test(prefix)) return [];
     return this.db.search(prefix, limit || this.defaultMaxResults);
   }
 }
